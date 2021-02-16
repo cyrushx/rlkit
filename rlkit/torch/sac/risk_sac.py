@@ -136,6 +136,14 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
         self.qf2_optimizer.zero_grad()
         losses.qf2_loss.backward()
         self.qf2_optimizer.step()
+        
+        self.rf1_optimizer.zero_grad()
+        losses.rf1_loss.backward()
+        self.rf1_optimizer.step()
+
+        self.rf2_optimizer.zero_grad()
+        losses.rf2_loss.backward()
+        self.rf2_optimizer.step()
 
         self._n_train_steps_total += 1
 
@@ -288,6 +296,10 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             self.qf2,
             self.target_qf1,
             self.target_qf2,
+            self.rf1,
+            self.rf2,
+            self.target_rf1,
+            self.target_rf2,
         ]
 
     @property
@@ -296,6 +308,8 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             self.alpha_optimizer,
             self.qf1_optimizer,
             self.qf2_optimizer,
+            self.rf1_optimizer,
+            self.rf2_optimizer,
             self.policy_optimizer,
         ]
 
@@ -306,4 +320,8 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             qf2=self.qf2,
             target_qf1=self.target_qf1,
             target_qf2=self.target_qf2,
+            rf1=self.rf1,
+            rf2=self.rf2,
+            target_rf1=self.target_rf1,
+            target_rf2=self.target_rf2,
         )
