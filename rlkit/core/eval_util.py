@@ -22,6 +22,25 @@ def get_generic_path_information(paths, stat_prefix=''):
                                                 stat_prefix=stat_prefix))
     statistics.update(create_stats_ordered_dict('Returns', returns,
                                                 stat_prefix=stat_prefix))
+
+    # Update risk info.
+    if 'collision' in paths[0]['env_infos'][0]:
+        immediate_risks = []
+        overall_risks = []
+        for path in paths:
+            immediate_risk = [info['collision'] for info in path['env_infos']]
+            immediate_risks.append([immediate_risk])
+
+            overall_risk = 0
+            for rb in immediate_risk:
+                overall_risk += (1 - overall_risk) * rb
+            overall_risks.append(overall_risk)
+        immediate_risks = np.vstack(immediate_risks)
+        statistics.update(create_stats_ordered_dict('Risks', overall_risks,
+                                                    stat_prefix=stat_prefix))
+        statistics.update(create_stats_ordered_dict('Collisions', immediate_risks,
+                                                    stat_prefix=stat_prefix))
+
     actions = [path["actions"] for path in paths]
     if len(actions[0].shape) == 1:
         actions = np.hstack([path["actions"] for path in paths])
