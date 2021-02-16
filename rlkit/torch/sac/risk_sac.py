@@ -97,11 +97,11 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             lr=qf_lr,
         )
         self.rf1_optimizer = optimizer_class(
-            self.qf1.parameters(),
+            self.rf1.parameters(),
             lr=rf_lr,
         )
         self.rf2_optimizer = optimizer_class(
-            self.qf2.parameters(),
+            self.rf2.parameters(),
             lr=rf_lr,
         )
 
@@ -199,7 +199,7 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             self.rf1(obs, new_obs_actions),
             self.rf2(obs, new_obs_actions),
         )
-        policy_loss = (alpha*log_pi - q_new_actions + 50.*r_new_actions).mean()
+        policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
 
         """
         QF Loss
