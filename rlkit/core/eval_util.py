@@ -28,12 +28,12 @@ def get_generic_path_information(paths, stat_prefix=''):
         immediate_risks = []
         overall_risks = []
         for path in paths:
-            immediate_risk = [info['collision'] for info in path['env_infos']]
-            immediate_risks.append([immediate_risk])
+            immediate_risk = [[info['collision']] for info in path['env_infos']]
+            immediate_risks.append(np.array(immediate_risk))
 
             overall_risk = 0
             for rb in immediate_risk:
-                overall_risk += (1 - overall_risk) * rb
+                overall_risk += (1 - overall_risk) * rb[0]
             overall_risks.append(overall_risk)
         immediate_risks = np.vstack(immediate_risks)
         statistics.update(create_stats_ordered_dict('Risks', overall_risks,
