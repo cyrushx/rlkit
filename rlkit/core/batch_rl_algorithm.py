@@ -1,9 +1,9 @@
 import abc
 
 import gtimer as gt
-from rlkit.core.rl_algorithm import BaseRLAlgorithm
-from rlkit.data_management.replay_buffer import ReplayBuffer
-from rlkit.samplers.data_collector import PathCollector
+from external.rlkit.rlkit.core.rl_algorithm import BaseRLAlgorithm
+from external.rlkit.rlkit.data_management.replay_buffer import ReplayBuffer
+from external.rlkit.rlkit.samplers.data_collector import PathCollector
 
 
 class BatchRLAlgorithm(BaseRLAlgorithm, metaclass=abc.ABCMeta):
