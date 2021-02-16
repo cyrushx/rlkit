@@ -182,11 +182,16 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             alpha_loss = 0
             alpha = 1
 
+        ## TODO: finetune the loss function BELOW
         q_new_actions = torch.min(
             self.qf1(obs, new_obs_actions),
             self.qf2(obs, new_obs_actions),
         )
-        policy_loss = (alpha*log_pi - q_new_actions).mean()
+        r_new_actions = torch.min(
+            self.rf1(obs, new_obs_actions),
+            self.rf2(obs, new_obs_actions),
+        )
+        policy_loss = (alpha*log_pi - q_new_actions + 50.*r_new_actions).mean()
 
         """
         QF Loss
