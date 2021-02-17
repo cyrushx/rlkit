@@ -32,8 +32,8 @@ def get_generic_path_information(paths, stat_prefix=''):
             immediate_risks.append(np.array(immediate_risk))
 
             overall_risk = 0
-            for rb in immediate_risk:
-                overall_risk += (1 - overall_risk) * rb[0]
+            for rb in immediate_risk[::-1]:
+                overall_risk = rb[0] + (1 - rb[0]) * overall_risk
             overall_risks.append(overall_risk)
         immediate_risks = np.vstack(immediate_risks)
         statistics.update(create_stats_ordered_dict('Risks', overall_risks,
@@ -51,32 +51,6 @@ def get_generic_path_information(paths, stat_prefix=''):
     ))
     statistics['Num Paths'] = len(paths)
     statistics[stat_prefix + 'Average Returns'] = get_average_returns(paths)
-
-    for info_key in ['env_infos', 'agent_infos']:
-        if info_key in paths[0]:
-            all_env_infos = [
-                ppp.list_of_dicts__to__dict_of_lists(p[info_key])
-                for p in paths
-            ]
-            for k in all_env_infos[0].keys():
-                final_ks = np.array([info[k][-1] for info in all_env_infos])
-                first_ks = np.array([info[k][0] for info in all_env_infos])
-                all_ks = np.concatenate([info[k] for info in all_env_infos])
-                statistics.update(create_stats_ordered_dict(
-                    stat_prefix + k,
-                    final_ks,
-                    stat_prefix='{}/final/'.format(info_key),
-                ))
-                statistics.update(create_stats_ordered_dict(
-                    stat_prefix + k,
-                    first_ks,
-                    stat_prefix='{}/initial/'.format(info_key),
-                ))
-                statistics.update(create_stats_ordered_dict(
-                    stat_prefix + k,
-                    all_ks,
-                    stat_prefix='{}/'.format(info_key),
-                ))
 
     return statistics
 
