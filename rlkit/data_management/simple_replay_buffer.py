@@ -56,7 +56,7 @@ class SimpleReplayBuffer(ReplayBuffer):
 
         # Update risk if a terminal state is seen.
         # er_t = rb_t + (1 - rb_t) * er_{t+1}
-        if terminal:
+        if terminal and 'risk' in self._env_infos:
             for t in range(self._top - 1, self._last_terminal, -1):
                 self._env_infos['risk'][t] = self._env_infos['collision'][t] + (
                         1 - self._env_infos['risk'][t]) * self._env_infos['risk'][t+1]
