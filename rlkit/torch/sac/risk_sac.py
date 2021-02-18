@@ -231,7 +231,7 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             self.target_rf2(next_obs, new_next_actions),
         ) - alpha * new_log_pi
 
-        r_target = self.reward_scale * rewards + (1. - terminals) * self.discount * target_r_values
+        r_target = self.reward_scale * collisions + (1. - terminals) * self.discount * target_r_values
         rf1_loss = self.qf_criterion(r1_pred, r_target.detach())
         rf2_loss = self.qf_criterion(r2_pred, r_target.detach())
 
