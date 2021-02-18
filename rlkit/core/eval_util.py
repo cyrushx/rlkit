@@ -33,7 +33,7 @@ def get_generic_path_information(paths, stat_prefix=''):
             immediate_risks.append(np.array(immediate_risk))
 
             overall_risk = 0
-            immediate_risks = immediate_risks[:risk_horizon]
+            immediate_risks = immediate_risks
             for rb in immediate_risk[::-1]:
                 overall_risk = rb[0] + (1 - rb[0]) * overall_risk
             overall_risks.append(overall_risk)

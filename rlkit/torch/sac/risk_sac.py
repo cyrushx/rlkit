@@ -177,6 +177,7 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
         actions = batch['actions']
         next_obs = batch['next_observations']
         collisions = batch['collision']
+        risk = batch['risk']
         """
         Policy and Alpha Loss
         """
@@ -195,13 +196,20 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             self.qf1(obs, new_obs_actions),
             self.qf2(obs, new_obs_actions),
         )
-        r_new_actions = torch.min(
-            self.rf1(obs, new_obs_actions),
-            self.rf2(obs, new_obs_actions),
-        )
+
+        # r_new_actions = torch.min(
+        #     self.rf1(obs, new_obs_actions),
+        #     self.rf2(obs, new_obs_actions),
+        # )
+        r_new_actions = self.rf1(obs, new_obs_actions)
+        r_bound = 0.2
+        r_loss_coeff = 10.0
+        r_diff = r_new_actions - r_bound
+        m = nn.Hardtanh(0, 1)
+        r_policy_loss = m(r_diff) * r_loss_coeff
         # TODO(cyrushx): Add risk in policy loss.
         # policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
-        policy_loss = (alpha*log_pi - q_new_actions).mean()
+        policy_loss = (alpha*log_pi - q_new_actions + r_policy_loss).mean()
 
         """
         QF Loss
@@ -232,7 +240,7 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
         #     self.target_rf2(next_obs, new_next_actions),
         # ) - alpha * new_log_pi
 
-        r_target = collisions + (1. - terminals) * (1 - collisions) * target_r_values
+        r_target = risk
         rf1_loss = self.rf_criterion(r1_pred, r_target.detach())
         rf2_loss = self.rf_criterion(r2_pred, r_target.detach())
 
