@@ -1,6 +1,9 @@
 from collections import OrderedDict, namedtuple
 from typing import Tuple
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 import numpy as np
 import torch
 import torch.optim as optim
