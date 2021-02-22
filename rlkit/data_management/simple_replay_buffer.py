@@ -41,6 +41,7 @@ class SimpleReplayBuffer(ReplayBuffer):
 
         self._top = 0
         self._size = 0
+        self._last_terminal = -1
 
     def add_sample(self, observation, action, reward, next_observation,
                    terminal, env_info, **kwargs):
@@ -52,6 +53,14 @@ class SimpleReplayBuffer(ReplayBuffer):
 
         for key in self._env_info_keys:
             self._env_infos[key][self._top] = env_info[key]
+
+        # Update risk if a terminal state is seen.
+        # er_t = rb_t + (1 - rb_t) * er_{t+1}
+        if terminal and 'risk' in self._env_infos:
+            for t in range(self._top - 1, self._last_terminal, -1):
+                self._env_infos['risk'][t] = self._env_infos['collision'][t] + (
+                        1 - self._env_infos['risk'][t]) * self._env_infos['risk'][t+1]
+            self._last_terminal = self._top
         self._advance()
 
     def terminate_episode(self):

@@ -1,6 +1,9 @@
 from collections import OrderedDict, namedtuple
 from typing import Tuple
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 import numpy as np
 import torch
 import torch.optim as optim
@@ -177,6 +180,7 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
         actions = batch['actions']
         next_obs = batch['next_observations']
         collisions = batch['collision']
+        risk = batch['risk']
         """
         Policy and Alpha Loss
         """
@@ -195,11 +199,20 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             self.qf1(obs, new_obs_actions),
             self.qf2(obs, new_obs_actions),
         )
-        r_new_actions = torch.min(
-            self.rf1(obs, new_obs_actions),
-            self.rf2(obs, new_obs_actions),
-        )
-        policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
+
+        # r_new_actions = torch.min(
+        #     self.rf1(obs, new_obs_actions),
+        #     self.rf2(obs, new_obs_actions),
+        # )
+        r_new_actions = self.rf1(obs, new_obs_actions)
+        r_bound = 0.2
+        r_loss_coeff = 10.0
+        r_diff = r_new_actions - r_bound
+        m = nn.Hardtanh(0, 1)
+        r_policy_loss = m(r_diff) * r_loss_coeff
+        # TODO(cyrushx): Add risk in policy loss.
+        # policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
+        policy_loss = (alpha*log_pi - q_new_actions + r_policy_loss).mean()
 
         """
         QF Loss
@@ -223,17 +236,16 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
         """
         r1_pred = self.rf1(obs, actions)
         r2_pred = self.rf2(obs, actions)
-        next_dist = self.policy(next_obs)
-        new_next_actions, new_log_pi = next_dist.rsample_and_logprob()
-        new_log_pi = new_log_pi.unsqueeze(-1)
-        target_r_values = torch.min(
-            self.target_rf1(next_obs, new_next_actions),
-            self.target_rf2(next_obs, new_next_actions),
-        ) - alpha * new_log_pi
+        # TODO(cyrushx): Replace target_r_values with ground truth risk values.
+        target_r_values = self.target_rf1(next_obs, new_next_actions)
+        # target_r_values = torch.min(
+        #     self.target_rf1(next_obs, new_next_actions),
+        #     self.target_rf2(next_obs, new_next_actions),
+        # ) - alpha * new_log_pi
 
-        r_target = self.reward_scale * collisions + (1. - terminals) * self.discount * target_r_values
-        rf1_loss = self.qf_criterion(r1_pred, r_target.detach())
-        rf2_loss = self.qf_criterion(r2_pred, r_target.detach())
+        r_target = risk
+        rf1_loss = self.rf_criterion(r1_pred, r_target.detach())
+        rf2_loss = self.rf_criterion(r2_pred, r_target.detach())
 
         """
         Save some statistics for eval
@@ -258,6 +270,22 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
             eval_statistics.update(create_stats_ordered_dict(
                 'Q Targets',
                 ptu.get_numpy(q_target),
+            ))
+            eval_statistics.update(create_stats_ordered_dict(
+                'R1 Predictions',
+                ptu.get_numpy(r1_pred),
+            ))
+            eval_statistics.update(create_stats_ordered_dict(
+                'R2 Predictions',
+                ptu.get_numpy(r2_pred),
+            ))
+            eval_statistics.update(create_stats_ordered_dict(
+                'R Targets',
+                ptu.get_numpy(r_target),
+            ))
+            eval_statistics.update(create_stats_ordered_dict(
+                'Collisions',
+                ptu.get_numpy(collisions),
             ))
             eval_statistics.update(create_stats_ordered_dict(
                 'Log Pis',
