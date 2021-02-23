@@ -3,10 +3,10 @@ from functools import partial
 
 import numpy as np
 
-from rlkit.core.eval_util import create_stats_ordered_dict
-from rlkit.samplers.data_collector.base import PathCollector
-from rlkit.samplers.rollout_functions import rollout
-
+from external.rlkit.rlkit.core.eval_util import create_stats_ordered_dict
+from external.rlkit.rlkit.samplers.data_collector.base import PathCollector
+from external.rlkit.rlkit.samplers.rollout_functions import rollout
+import pdb
 
 class MdpPathCollector(PathCollector):
     def __init__(
@@ -95,6 +95,40 @@ class MdpPathCollector(PathCollector):
             snapshot_dict['env'] = self._env
         return snapshot_dict
 
+class RiskConditionedPathCollector(MdpPathCollector):
+    def __init__(
+            self,
+            *args,
+            observation_key='observation',
+            risk_bound_key='risk_bound',
+            risk_budget_key='risk_budget',
+            **kwargs
+    ):
+        """risk_bound_key: key in info dict"""
+        def obs_processor(o):
+            return np.hstack((o[observation_key], o[risk_budget_key], o[risk_bound_key]))
+        def obs_postprocessor(o):
+            o = o[observation_key]
+            return o
+
+        rollout_fn = partial(
+            rollout,
+            preprocess_obs_for_policy_fn=obs_processor,
+        )
+        super().__init__(*args, rollout_fn=rollout_fn, **kwargs)
+        self._observation_key = observation_key
+        self._risk_bound_key = risk_bound_key
+
+    def collect_new_paths(self, *args, **kwargs):
+        return super().collect_new_paths(*args, **kwargs)
+
+    def get_snapshot(self):
+        snapshot = super().get_snapshot()
+        snapshot.update(
+            risk_bound_key = self._risk_bound_key,
+            observation_key = self._observation_key
+        )
+        return snapshot   
 
 class GoalConditionedPathCollector(MdpPathCollector):
     def __init__(

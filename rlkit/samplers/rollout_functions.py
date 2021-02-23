@@ -113,6 +113,15 @@ def rollout(
         next_o, r, d, env_info = env.step(copy.deepcopy(a))
         if render:
             env.render(**render_kwargs)
+        
+        obs_is_dict = False
+        if isinstance(o, dict):
+            ## TODO: this is a quick fix, use Dict Buffer to replace these lines
+            o_dict_next = copy.deepcopy(next_o)
+            o = o['observation']
+            next_o = next_o['observation']
+            obs_is_dict = True
+            
         observations.append(o)
         rewards.append(r)
         terminals.append(d)
@@ -124,7 +133,11 @@ def rollout(
         path_length += 1
         if d:
             break
-        o = next_o
+        
+        if obs_is_dict:
+            o = o_dict_next
+        else:
+            o = next_o
     actions = np.array(actions)
     if len(actions.shape) == 1:
         actions = np.expand_dims(actions, 1)
