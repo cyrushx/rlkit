@@ -1,6 +1,6 @@
 import numpy as np
 
-from rlkit.data_management.obs_dict_replay_buffer import ObsDictRelabelingBuffer
+from external.rlkit.rlkit.data_management.obs_dict_replay_buffer import ObsDictRelabelingBuffer
 
 import torch.multiprocessing as mp
 import ctypes
