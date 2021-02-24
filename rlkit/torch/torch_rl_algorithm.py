@@ -4,10 +4,10 @@ from collections import OrderedDict
 from typing import Iterable
 from torch import nn as nn
 
-from rlkit.core.batch_rl_algorithm import BatchRLAlgorithm
-from rlkit.core.online_rl_algorithm import OnlineRLAlgorithm
-from rlkit.core.trainer import Trainer
-from rlkit.torch.core import np_to_pytorch_batch
+from external.rlkit.rlkit.core.batch_rl_algorithm import BatchRLAlgorithm
+from external.rlkit.rlkit.core.online_rl_algorithm import OnlineRLAlgorithm
+from external.rlkit.rlkit.core.trainer import Trainer
+from external.rlkit.rlkit.torch.core import np_to_pytorch_batch
 
 
 class TorchOnlineRLAlgorithm(OnlineRLAlgorithm):
