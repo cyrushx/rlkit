@@ -2,14 +2,14 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from rlkit.policies.base import Policy
-from rlkit.pythonplusplus import identity
-from rlkit.torch import pytorch_util as ptu
-from rlkit.torch.core import PyTorchModule, eval_np
-from rlkit.torch.data_management.normalizer import TorchFixedNormalizer
-from rlkit.torch.networks import LayerNorm
-from rlkit.torch.pytorch_util import activation_from_string
-
+from external.rlkit.rlkit.policies.base import Policy
+from external.rlkit.rlkit.pythonplusplus import identity
+from external.rlkit.rlkit.torch import pytorch_util as ptu
+from external.rlkit.rlkit.torch.core import PyTorchModule, eval_np
+from external.rlkit.rlkit.torch.data_management.normalizer import TorchFixedNormalizer
+from external.rlkit.rlkit.torch.networks import LayerNorm
+from external.rlkit.rlkit.torch.pytorch_util import activation_from_string
+import pdb
 
 class Mlp(PyTorchModule):
     def __init__(

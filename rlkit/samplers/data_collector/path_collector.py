@@ -101,7 +101,7 @@ class RiskConditionedPathCollector(MdpPathCollector):
             *args,
             observation_key='observation',
             risk_bound_key='risk_bound',
-            risk_budget_key='risk_budget',
+            risk_budget_key='allocated_risk',
             **kwargs
     ):
         """risk_bound_key: key in info dict"""
