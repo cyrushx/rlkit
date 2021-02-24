@@ -7,13 +7,13 @@ matplotlib.use('TkAgg')
 import numpy as np
 import torch
 import torch.optim as optim
-from rlkit.core.loss import LossFunction, LossStatistics
 from torch import nn as nn
 
-import rlkit.torch.pytorch_util as ptu
-from rlkit.core.eval_util import create_stats_ordered_dict
-from rlkit.torch.torch_rl_algorithm import TorchTrainer
-from rlkit.core.logging import add_prefix
+from external.rlkit.rlkit.core.loss import LossFunction, LossStatistics
+import external.rlkit.rlkit.torch.pytorch_util as ptu
+from external.rlkit.rlkit.core.eval_util import create_stats_ordered_dict
+from external.rlkit.rlkit.torch.torch_rl_algorithm import TorchTrainer
+from external.rlkit.rlkit.core.logging import add_prefix
 import gtimer as gt
 import pdb
 
@@ -174,7 +174,6 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
         batch,
         skip_statistics=False,
     ) -> Tuple[SACLosses, LossStatistics]:
-        pdb.set_trace()
         rewards = batch['rewards']
         terminals = batch['terminals']
         obs = batch['observations']
@@ -182,10 +181,14 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
         next_obs = batch['next_observations']
         collisions = batch['collision']
         risk = batch['risk']
+        risk_budget = batch['risk_budget']
+        risk_bound = batch['risk_bound']
+        next_risk_budget = batch['next_risk_budget']
         """
         Policy and Alpha Loss
         """
-        dist = self.policy(obs)
+        obs_concat = torch.cat([obs, risk_budget, risk_bound], dim=1)
+        dist = self.policy(obs_concat)
         new_obs_actions, log_pi = dist.rsample_and_logprob()
         log_pi = log_pi.unsqueeze(-1)
         if self.use_automatic_entropy_tuning:
@@ -200,13 +203,13 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
             self.qf1(obs, new_obs_actions),
             self.qf2(obs, new_obs_actions),
         )
-
+        pdb.set_trace()
         # r_new_actions = torch.min(
         #     self.rf1(obs, new_obs_actions),
         #     self.rf2(obs, new_obs_actions),
         # )
         r_new_actions = self.rf1(obs, new_obs_actions)
-        r_bound = 0.2
+        r_bound = self.env._risk_bound
         r_loss_coeff = 10.0
         r_diff = r_new_actions - r_bound
         m = nn.Hardtanh(0, 1)
@@ -214,6 +217,12 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
         # TODO(cyrushx): Add risk in policy loss.
         # policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
         policy_loss = (alpha*log_pi - q_new_actions + r_policy_loss).mean()
+        
+        # r_bound = 
+        # r_left = r_bound - r_new_actions
+        # m = nn.Hardtanh(0, 0.01)
+        # r_step = m(r_left) * 100
+        # policy_loss = (alpha * log_pi - q_new_actions * r_step).mean()
 
         """
         QF Loss
