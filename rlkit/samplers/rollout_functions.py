@@ -79,6 +79,7 @@ def rollout(
         return_dict_obs=False,
         full_o_postprocess_func=None,
         reset_callback=None,
+        risk_bound=None,
 ):
     if render_kwargs is None:
         render_kwargs = {}
@@ -97,7 +98,7 @@ def rollout(
     next_observations = []
     path_length = 0
     agent.reset()
-    o = env.reset()
+    o = env.reset(risk_bound)
     if reset_callback:
         reset_callback(env, agent, o)
     if render:
@@ -105,6 +106,7 @@ def rollout(
     while path_length < max_path_length:
         raw_obs.append(o)
         o_for_agent = preprocess_obs_for_policy_fn(o)
+        # import IPython; IPython.embed()
         a, agent_info = agent.get_action(o_for_agent, **get_action_kwargs)
 
         if full_o_postprocess_func:

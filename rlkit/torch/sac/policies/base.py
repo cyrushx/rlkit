@@ -24,6 +24,11 @@ class TorchStochasticPolicy(
     ExplorationPolicy, metaclass=abc.ABCMeta
 ):
     def get_action(self, obs_np, ):
+        if type(obs_np) is dict:
+            obs = obs_np['observation']
+            risk_bound = np.array(obs_np['risk_bound'])
+            allocated_risk = np.array(obs_np['allocated_risk'])
+            obs_np = np.hstack([obs, allocated_risk, risk_bound])
         actions = self.get_actions(obs_np[None])
         return actions[0, :], {}
 
