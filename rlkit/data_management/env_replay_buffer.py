@@ -1,7 +1,7 @@
 from gym.spaces import Discrete
 
-from external.rlkit.rlkit.data_management.simple_replay_buffer import SimpleReplayBuffer
-from external.rlkit.rlkit.envs.env_utils import get_dim
+from rlkit.data_management.simple_replay_buffer import SimpleReplayBuffer
+from rlkit.envs.env_utils import get_dim
 import numpy as np
 
 

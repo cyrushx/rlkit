@@ -7,7 +7,7 @@ from numbers import Number
 
 import numpy as np
 
-import external.rlkit.rlkit.pythonplusplus as ppp
+import rlkit.pythonplusplus as ppp
 
 
 def get_generic_path_information(paths, stat_prefix=''):

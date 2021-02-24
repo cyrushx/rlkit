@@ -17,7 +17,7 @@ import pickle
 import errno
 import torch
 
-from external.rlkit.rlkit.core.tabulate import tabulate
+from rlkit.core.tabulate import tabulate
 from collections import OrderedDict
 
 def add_prefix(log_dict: OrderedDict, prefix: str, divider=''):
