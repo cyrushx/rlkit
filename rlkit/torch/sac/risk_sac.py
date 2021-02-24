@@ -51,6 +51,11 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
 
             use_automatic_entropy_tuning=True,
             target_entropy=None,
+
+            # Upper risk bound.
+            delta=0.1,
+            # Coefficient of risk penalty.
+            risk_coeff=1.0,
     ):
         super().__init__()
         self.env = env
@@ -113,6 +118,8 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
         self._n_train_steps_total = 0
         self._need_to_update_eval_statistics = True
         self.eval_statistics = OrderedDict()
+        self.delta = delta
+        self.risk_coeff = risk_coeff
 
     def train_from_torch(self, batch):
         gt.blank_stamp()
@@ -205,8 +212,8 @@ class RiskSACTrainer(TorchTrainer, LossFunction):
         #     self.rf2(obs, new_obs_actions),
         # )
         r_new_actions = self.rf1(obs, new_obs_actions)
-        r_bound = 0.2
-        r_loss_coeff = 10.0
+        r_bound = self.delta
+        r_loss_coeff = self.risk_coeff
         r_diff = r_new_actions - r_bound
         m = nn.Hardtanh(0, 1)
         r_policy_loss = m(r_diff) * r_loss_coeff
