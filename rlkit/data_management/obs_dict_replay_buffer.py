@@ -1,7 +1,7 @@
 import numpy as np
 from gym.spaces import Dict, Discrete
 
-from rlkit.data_management.replay_buffer import ReplayBuffer
+from external.rlkit.rlkit.data_management.replay_buffer import ReplayBuffer
 
 
 class ObsDictRelabelingBuffer(ReplayBuffer):

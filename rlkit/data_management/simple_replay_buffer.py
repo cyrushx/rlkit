@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 
 from external.rlkit.rlkit.data_management.replay_buffer import ReplayBuffer
-
+import pdb
 
 class SimpleReplayBuffer(ReplayBuffer):
 
@@ -75,6 +75,7 @@ class SimpleReplayBuffer(ReplayBuffer):
         indices = np.random.choice(self._size, size=batch_size, replace=self._replace or self._size < batch_size)
         if not self._replace and self._size < batch_size:
             warnings.warn('Replace was set to false, but is temporarily set to true because batch size is larger than current size of replay.')
+        pdb.set_trace()
         batch = dict(
             observations=self._observations[indices],
             actions=self._actions[indices],
