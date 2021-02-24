@@ -1,9 +1,9 @@
-from external.rlkit.rlkit.torch.sac.policies.base import (
+from rlkit.torch.sac.policies.base import (
     TorchStochasticPolicy,
     PolicyFromDistributionGenerator,
     MakeDeterministic,
 )
-from external.rlkit.rlkit.torch.sac.policies.gaussian_policy import (
+from rlkit.torch.sac.policies.gaussian_policy import (
     TanhGaussianPolicyAdapter,
     TanhGaussianPolicy,
     GaussianPolicy,
@@ -13,8 +13,8 @@ from external.rlkit.rlkit.torch.sac.policies.gaussian_policy import (
     TanhGaussianObsProcessorPolicy,
     TanhCNNGaussianPolicy,
 )
-from external.rlkit.rlkit.torch.sac.policies.lvm_policy import LVMPolicy
-from external.rlkit.rlkit.torch.sac.policies.policy_from_q import PolicyFromQ
+from rlkit.torch.sac.policies.lvm_policy import LVMPolicy
+from rlkit.torch.sac.policies.policy_from_q import PolicyFromQ
 
 
 __all__ = [

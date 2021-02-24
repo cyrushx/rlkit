@@ -3,9 +3,9 @@ from functools import partial
 
 import numpy as np
 
-from external.rlkit.rlkit.core.eval_util import create_stats_ordered_dict
-from external.rlkit.rlkit.samplers.data_collector.base import PathCollector
-from external.rlkit.rlkit.samplers.rollout_functions import rollout
+from rlkit.core.eval_util import create_stats_ordered_dict
+from rlkit.samplers.data_collector.base import PathCollector
+from rlkit.samplers.rollout_functions import rollout
 import pdb
 
 class MdpPathCollector(PathCollector):
