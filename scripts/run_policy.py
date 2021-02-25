@@ -22,7 +22,7 @@ def simulate_policy(args):
         set_gpu_mode(True)
         policy.cuda()
     paths = []
-    risk_bounds = [0.1, 0.2, 0.29]
+    risk_bounds = [0.05, 0.1, 0.2, 0.3]
     for risk_bound in risk_bounds:
         path = rollout(
             env,
@@ -37,7 +37,7 @@ def simulate_policy(args):
         logger.dump_tabular()
 
     if args.visualize:
-        plot_problem_paths(env, paths, risk_bounds, fig_dir, show_fig=False)
+        plot_problem_paths(env, paths, risk_bounds, fig_dir, show_fig=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
