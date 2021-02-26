@@ -25,7 +25,6 @@ def get_generic_path_information(paths, stat_prefix=''):
 
     # Update risk info.
     if 'collision' in paths[0]['env_infos'][0]:
-        risk_horizon = 10
         immediate_risks = []
         overall_risks = []
         for path in paths:
@@ -41,6 +40,22 @@ def get_generic_path_information(paths, stat_prefix=''):
         statistics.update(create_stats_ordered_dict('Risks', overall_risks,
                                                     stat_prefix=stat_prefix))
         statistics.update(create_stats_ordered_dict('Collisions', immediate_risks,
+                                                    stat_prefix=stat_prefix))
+
+    # Update distance info.
+    if 'Step distance' in paths[0]['env_infos'][0]:
+        step_distances = []
+        total_distances = []
+        for path in paths:
+            step_distance = [[info['Step distance']] for info in path['env_infos']]
+            step_distances.append(np.array(step_distance))
+
+            total_distance = np.sum(step_distance)
+            total_distances.append(total_distance)
+        step_distances = np.vstack(step_distances)
+        statistics.update(create_stats_ordered_dict('Step distance', step_distances,
+                                                    stat_prefix=stat_prefix))
+        statistics.update(create_stats_ordered_dict('Distance', total_distances,
                                                     stat_prefix=stat_prefix))
 
     # for info_key in ['env_infos']:

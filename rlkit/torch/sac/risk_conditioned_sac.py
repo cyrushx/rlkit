@@ -225,12 +225,6 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
         # TODO(cyrushx): Add risk in policy loss.
         # policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
         policy_loss = (alpha*log_pi - q_new_actions + r_policy_loss).mean()
-        
-        # r_bound = 
-        # r_left = r_bound - r_new_actions
-        # m = nn.Hardtanh(0, 0.01)
-        # r_step = m(r_left) * 100
-        # policy_loss = (alpha * log_pi - q_new_actions * r_step).mean()
 
         """
         QF Loss
