@@ -1,5 +1,6 @@
 import argparse
 import os
+import time
 import torch
 import uuid
 
@@ -22,8 +23,9 @@ def simulate_policy(args):
         set_gpu_mode(True)
         policy.cuda()
     paths = []
-    risk_bounds = [0.05, 0.1, 0.2, 0.3]
+    risk_bounds = [0.1, 0.2, 0.3]
     for risk_bound in risk_bounds:
+        t0 = time.time()
         path = rollout(
             env,
             policy,
@@ -31,6 +33,8 @@ def simulate_policy(args):
             render=True,
             risk_bound=risk_bound,
         )
+        time_diff = time.time()- t0
+        print("RB {} Time used: {}s".format(risk_bound, time_diff))
         paths.append(path)
         if hasattr(env, "log_diagnostics"):
             env.log_diagnostics([path])
