@@ -221,6 +221,9 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
 
         ## TODO: softmax for risk critic
         overused_risk = r_new_actions - risk_bound
+        # m = nn.Hardtanh(0, 1)
+        # r_policy_loss = m(overused_risk) * r_loss_coeff
+
         r_policy_loss = torch.nn.functional.relu(overused_risk) * r_loss_coeff # > 0 if violate risk, =0 otherwise
         # TODO(cyrushx): Add risk in policy loss.
         # policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
