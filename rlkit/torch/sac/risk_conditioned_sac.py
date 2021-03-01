@@ -228,6 +228,7 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
         # TODO(cyrushx): Add risk in policy loss.
         # policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
         policy_loss = (alpha*log_pi - q_new_actions + r_policy_loss).mean()
+        # policy_loss = (alpha*log_pi - q_new_actions).mean()
 
         """
         QF Loss
@@ -245,7 +246,7 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
         q_target = self.reward_scale * rewards + (1. - terminals) * self.discount * target_q_values
         qf1_loss = self.qf_criterion(q1_pred, q_target.detach())
         qf2_loss = self.qf_criterion(q2_pred, q_target.detach())
-        
+
         """
         Risk Critic Loss
         """
