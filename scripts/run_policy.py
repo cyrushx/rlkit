@@ -55,7 +55,8 @@ def simulate_dubins_policy(args):
         set_gpu_mode(True)
         policy.cuda()
     paths = []
-    risk_bounds = [0.2, 0.3, 0.4]
+    # Risk bound for evaluation.
+    risk_bounds = [0.05, 0.15, 0.25]
     for risk_bound in risk_bounds:
         t0 = time.time()
         path = rollout(
