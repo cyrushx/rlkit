@@ -210,23 +210,13 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
             self.qf2(obs, new_obs_actions),
         )
         
-        # r_new_actions = torch.min(
-        #     self.rf1(obs, new_obs_actions),
-        #     self.rf2(obs, new_obs_actions),
-        # )
         ## NOTE: if budget is already <0, it means that at the timestep
         ## the risk bound  constraint is already violated
         r_new_actions = self.rf1(obs, new_obs_actions)
         r_loss_coeff = self.risk_coeff
 
-        ## TODO: softmax for risk critic
         overused_risk = r_new_actions - risk_bound
-        # m = nn.Hardtanh(0, 1)
-        # r_policy_loss = m(overused_risk) * r_loss_coeff
-
-        r_policy_loss = torch.nn.functional.relu(overused_risk) * r_loss_coeff # > 0 if violate risk, =0 otherwise
-        # TODO(cyrushx): Add risk in policy loss.
-        # policy_loss = (alpha*log_pi - q_new_actions + 1.*r_new_actions).mean()
+        r_policy_loss = torch.nn.functional.relu(overused_risk) * r_loss_coeff  # > 0 if violate risk, = 0 otherwise
         policy_loss = (alpha*log_pi - q_new_actions + r_policy_loss).mean()
         # policy_loss = (alpha*log_pi - q_new_actions).mean()
 
@@ -252,31 +242,10 @@ class RiskConditionedSACTrainer(TorchTrainer, LossFunction):
         """
         r1_pred = self.rf1(obs, actions)
         r2_pred = self.rf2(obs, actions)
-        # TODO(cyrushx): Replace target_r_values with ground truth risk values.
-        # target_r_values = self.target_rf1(next_obs, new_next_actions)
-        # target_r_values = torch.min(
-        #     self.target_rf1(next_obs, new_next_actions),
-        #     self.target_rf2(next_obs, new_next_actions),
-        # ) - alpha * new_log_pi
 
         r_target = risk
         rf1_loss = self.rf_criterion(r1_pred, r_target.detach())
         rf2_loss = self.rf_criterion(r2_pred, r_target.detach())
-
-        # r1_pred = self.rf1(obs, actions)
-        # r2_pred = self.rf2(obs, actions)
-        # next_dist = self.policy(next_obs_concat)
-        # new_next_actions, new_log_pi = next_dist.rsample_and_logprob()
-        # new_log_pi = new_log_pi.unsqueeze(-1)
-        # target_r_values = torch.min(
-        #     self.target_rf1(next_obs, new_next_actions),
-        #     self.target_rf2(next_obs, new_next_actions),
-        # ) - alpha * new_log_pi
-        #
-        # r_target = self.reward_scale * risk + (1. - terminals) * self.discount * target_r_values
-        # rf1_loss = self.rf_criterion(r1_pred, r_target.detach())
-        # rf2_loss = self.rf_criterion(r2_pred, r_target.detach())
-
 
         """
         Save some statistics for eval

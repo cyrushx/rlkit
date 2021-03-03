@@ -80,6 +80,7 @@ def rollout(
         full_o_postprocess_func=None,
         reset_callback=None,
         risk_bound=None,
+        test_mode=False,
 ):
     if render_kwargs is None:
         render_kwargs = {}
@@ -106,13 +107,12 @@ def rollout(
     while path_length < max_path_length:
         raw_obs.append(o)
         o_for_agent = preprocess_obs_for_policy_fn(o)
-        # import IPython; IPython.embed()
         a, agent_info = agent.get_action(o_for_agent, **get_action_kwargs)
 
         if full_o_postprocess_func:
             full_o_postprocess_func(env, agent, o)
 
-        next_o, r, d, env_info = env.step(copy.deepcopy(a))
+        next_o, r, d, env_info = env.step(copy.deepcopy(a), test_mode)
         if render:
             env.render(**render_kwargs)
         

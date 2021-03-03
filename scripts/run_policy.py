@@ -15,66 +15,36 @@ filename = str(uuid.uuid4())
 def simulate_policy(args):
     data = torch.load(args.file)
     fig_dir = os.path.dirname(args.file)
-    print(fig_dir)
     policy = data['evaluation/policy']
     env = data['evaluation/env']
     print("Policy loaded")
     if args.gpu:
         set_gpu_mode(True)
         policy.cuda()
+
+    # Obtain path for each risk bound.
+    risk_bounds = args.risk_bounds
     paths = []
-    risk_bounds = [0.1, 0.2, 0.3]
+    times = []
     for risk_bound in risk_bounds:
         t0 = time.time()
+        # Roll out path in test mode (without risk computation, fixed random seed).
         path = rollout(
             env,
             policy,
             max_path_length=args.H,
             render=True,
             risk_bound=risk_bound,
+            test_mode=True,
         )
-        time_diff = time.time()- t0
-        print("RB {} Time used: {}s".format(risk_bound, time_diff))
+        time_diff = time.time() - t0
+        times.append(time_diff)
         paths.append(path)
         if hasattr(env, "log_diagnostics"):
             env.log_diagnostics([path])
         logger.dump_tabular()
 
-    if args.visualize:
-        plot_problem_paths(env, paths, risk_bounds, fig_dir, show_fig=True)
-
-
-def simulate_dubins_policy(args):
-    data = torch.load(args.file)
-    fig_dir = os.path.dirname(args.file)
-    print(fig_dir)
-    policy = data['evaluation/policy']
-    env = data['evaluation/env']
-    print("Policy loaded")
-    if args.gpu:
-        set_gpu_mode(True)
-        policy.cuda()
-    paths = []
-    # Risk bound for evaluation.
-    risk_bounds = [0.05, 0.15, 0.25]
-    for risk_bound in risk_bounds:
-        t0 = time.time()
-        path = rollout(
-            env,
-            policy,
-            max_path_length=args.H,
-            render=True,
-            risk_bound=risk_bound,
-        )
-        time_diff = time.time()- t0
-        print("RB {} Time used: {}s".format(risk_bound, time_diff))
-        paths.append(path)
-        if hasattr(env, "log_diagnostics"):
-            env.log_diagnostics([path])
-        logger.dump_tabular()
-
-    if args.visualize:
-        plot_problem_paths(env, paths, risk_bounds, fig_dir, show_fig=True)
+    plot_problem_paths(env, paths, risk_bounds, times, fig_dir, show_fig=args.visualize, show_baseline=args.baseline)
 
 
 if __name__ == "__main__":
@@ -84,15 +54,13 @@ if __name__ == "__main__":
     parser.add_argument('--H', type=int, default=300,
                         help='Max length of rollout')
     parser.add_argument('--gpu', action='store_true')
-    parser.add_argument('-n', '--num-path', type=int, default=10,
-                        help='Number of paths to simulate.')
+    parser.add_argument('--baseline', action='store_true')
     parser.add_argument('-v', '--visualize', action='store_true',
-                        help='Whether to visualize paths.')
-    parser.add_argument('-d', '--dubins', action='store_true',
-                        help='Whether to visualize dubins paths.')
+                        help='Whether to pop visualized paths.')
+    parser.add_argument('--risk-bounds',
+                        nargs='+',
+                        type=float,
+                        default=[0.1, 0.2, 0.3],
+                        help="Set of risk bounds to plot.")
     args = parser.parse_args()
-
-    if args.dubins:
-        simulate_dubins_policy(args)
-    else:
-        simulate_policy(args)
+    simulate_policy(args)
