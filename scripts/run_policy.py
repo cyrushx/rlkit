@@ -3,6 +3,7 @@ import os
 import time
 import torch
 import uuid
+import numpy as np
 
 from rlkit.samplers.rollout_functions import rollout
 from rlkit.torch.pytorch_util import set_gpu_mode
@@ -44,7 +45,38 @@ def simulate_policy(args):
             env.log_diagnostics([path])
         logger.dump_tabular()
 
-    plot_problem_paths(env, paths, risk_bounds, times, fig_dir, show_fig=args.visualize, show_baseline=args.baseline)
+    # Generate paths at different initial locations.
+    start_locations = [[4.0, 4.0], [15.0, 10.0], [17.0, 17.0], [16.0, 5.0]]
+    paths_s = []
+    for start in start_locations:
+        env.set_start_state(np.array(start))
+        path = rollout(
+            env,
+            policy,
+            max_path_length=args.H,
+            render=True,
+            risk_bound=0.1,
+            test_mode=True,
+        )
+        paths_s.append(path)
+
+    start_locations = [[4.0, 4.0], [15.0, 10.0], [17.0, 17.0], [16.0, 5.0]]
+    paths = []
+    for start in start_locations:
+        env.set_start_state(np.array(start))
+        path = rollout(
+            env,
+            policy,
+            max_path_length=args.H,
+            render=True,
+            risk_bound=0.3,
+            test_mode=True,
+        )
+        paths.append(path)
+    env.set_start_state(np.array([4.0, 4.0]))
+
+    plot_problem_paths(env, paths, risk_bounds, times, fig_dir, show_fig=args.visualize, show_baseline=args.baseline,
+                       extra_paths=paths_s)
 
 
 if __name__ == "__main__":

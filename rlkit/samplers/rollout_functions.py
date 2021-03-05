@@ -99,7 +99,7 @@ def rollout(
     next_observations = []
     path_length = 0
     agent.reset()
-    o = env.reset(risk_bound)
+    o = env.reset(risk_bound, test_mode)
     if reset_callback:
         reset_callback(env, agent, o)
     if render:
